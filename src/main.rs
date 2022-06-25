@@ -21,7 +21,9 @@ async fn main() {
         handle.await.unwrap();
     }
     let duration = start.elapsed();
-    println!("Закончил за: {:?}. Закрой меня", duration);
+    println!("Закончил за: {:?}. Закрой меня...", duration);
+    let mut input = String::new();
+    io::stdin().read_line(&mut input);
 }
 fn input_model() -> String {
     let mut input = String::new();
@@ -51,6 +53,6 @@ async fn req(i:String, model:String) -> Result<(), Box<dyn std::error::Error>> {
         Err(_) => panic!("couldn't parse json"),
         Ok(v) => v,
     };
-    println!("{} {}",i, v);
+    println!("{}\t{}",i, v["check_result"]);
     Ok(())
 }
