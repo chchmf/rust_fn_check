@@ -6,14 +6,18 @@ use std::io::{BufReader, BufRead};
 
 #[tokio::main]
 async fn main() {
+    println!("1 - проверяем ФН\n2 - проверяем ККТ");
+    let types = input_model();
+    println!("Введи код модели: ");
     let model = input_model();
     let start = Instant::now();
     let list = open_list();
     let mut handles = vec![];
     for i in list {
         let m: String = model.clone();
+        let types: i8 = types.clone().trim().parse().unwrap();
         let handle = tokio::spawn(async move{
-            req(i, m).await;
+            req(i, m, types).await;
         });
         handles.push(handle);
     }
@@ -25,9 +29,9 @@ async fn main() {
     let mut input = String::new();
     io::stdin().read_line(&mut input);
 }
+
 fn input_model() -> String {
     let mut input = String::new();
-    println!("Введи код модели: ");
     io::stdin().read_line(&mut input);
     input
 }
@@ -43,8 +47,10 @@ fn open_list() -> Vec<String> {
 }
 
 
-async fn req(i:String, model:String) -> Result<(), Box<dyn std::error::Error>> {
-    let url = "https://kkt-online.nalog.ru/lkip.html?query=/fn/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model;
+async fn req(i:String, model:String, types: i8) -> Result<(), Box<dyn std::error::Error>> {
+    let url = if types == 1 {"https://kkt-online.nalog.ru/lkip.html?query=/fn/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model}
+    else if types == 2 {"https://kkt-online.nalog.ru/lkip.html?query=/kkt/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model}
+    else {"s".to_owned()};
     let resp = reqwest::get(url)
         .await?
         .text()
