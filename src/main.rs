@@ -3,7 +3,6 @@ use std::time::{Instant};
 use std::io;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
-use simple_excel_writer::*;
 
 #[tokio::main]
 async fn main() {
@@ -12,11 +11,6 @@ async fn main() {
     println!("Введи код модели: ");
     let model = input();
     let start = Instant::now();
-    let mut wb = Workbook::create("result.xlsx");
-    let mut sheet = wb.create_sheet(&model);
-    let fc: String = String::from("s/n");
-    let sc: String = String::from("result");
-    write_sheet(wb, sheet, fc, sc);
 
     let list = open_list();
     let mut handles = vec![];
@@ -51,13 +45,6 @@ fn open_list() -> Vec<String> {
     let buffer = BufReader::new(file);
     let list: Vec<String> = buffer.lines().collect::<Result<_, _>>().unwrap();
     list
-}
-
-fn write_sheet(mut wb: Workbook, mut sheet: Sheet, first_col: String, second_col: String) {
-    wb.write_sheet(&mut sheet, |sheet_writer| {
-        let sw = sheet_writer;
-        sw.append_row(row![first_col, second_col])
-    }).expect("write excel error!");
 }
 
 async fn req(i:String, model:String, types: i8) -> Result<(), Box<dyn std::error::Error>> {
