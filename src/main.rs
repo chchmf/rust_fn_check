@@ -57,6 +57,8 @@ async fn main() -> Result<(), Box<dyn Error>>{
         sw.append_row(row![blank!(3)])
     }).expect("write excel error!");
 
+    wb.close().expect("close excel error!");
+
     let duration = start.elapsed();
     println!("Закончил за: {:?}. Закрой меня...", duration);
     let mut input = String::new();
