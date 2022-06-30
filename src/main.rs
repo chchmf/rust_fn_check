@@ -1,4 +1,3 @@
-
 use serde_json::Value;
 use std::time::{Instant};
 use std::{io, vec};
@@ -14,7 +13,7 @@ use regex::Regex;
 async fn main() -> Result<(), Box<dyn Error>>{
     println!("1 - проверяем ФН\n2 - проверяем ККТ");
     let types: i8 = input().trim().parse().unwrap();
-    let mut model: String;
+    let model: String;
     if types == 2{
         println!("Введи код модели: ");
         model = input();
@@ -60,10 +59,10 @@ async fn main() -> Result<(), Box<dyn Error>>{
     
     wb.write_sheet(&mut sheet, |sheet_writer| {
         let sw = sheet_writer;
-        sw.append_row(row!["SN", "Parse result", "Source result"]);
+        sw.append_row(row!["SN", "Parse result", "Source result"]).unwrap();
         for i in results{
             let (one, two, three) = i;
-            sw.append_row(row![one, two, three]);
+            sw.append_row(row![one, two, three])?;
         }
         sw.append_row(row![blank!(3)])
     }).expect("write excel error!");
@@ -73,13 +72,13 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let duration = start.elapsed();
     println!("Закончил за: {:?}. Закрой меня...", duration);
     let mut input = String::new();
-    io::stdin().read_line(&mut input);
+    io::stdin().read_line(&mut input).unwrap();
     Ok(())
 }
 
 fn input() -> String {
     let mut input = String::new();
-    io::stdin().read_line(&mut input);
+    io::stdin().read_line(&mut input).unwrap();
     input
 }
 fn open_list() -> Vec<String> {
@@ -91,7 +90,7 @@ fn open_list() -> Vec<String> {
 }
 
 async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, String), Box<dyn Error>> {
-    let mut vecc: String;
+    let vecc: String;
     let url = if types == 1 {
         let fn15m = Regex::new(r"^996044\d{10}$").unwrap();
         let fn36m = Regex::new(r"^996144\d{10}$").unwrap();
