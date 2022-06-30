@@ -7,14 +7,22 @@ use std::io::{BufReader, BufRead};
 use std::{error::Error};
 use futures::future::try_join_all;
 use simple_excel_writer::*;
+use regex::Regex;
 
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{
     println!("1 - проверяем ФН\n2 - проверяем ККТ");
-    let types = input();
-    println!("Введи код модели: ");
-    let model = input();
+    let types: i8 = input().trim().parse().unwrap();
+    let mut model: String;
+    if types == 2{
+        println!("Введи код модели: ");
+        model = input();
+    }
+    else {
+        model = String::from("fn");
+    }
+
     let start = Instant::now();
 
     let mut vec = vec![];
@@ -24,8 +32,8 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     for i in list {
         let m: String = model.clone();
-        let types: i8 = types.clone().trim().parse().unwrap();
-        let strng = req(i, m, types);
+        let types: i8 = types.clone();
+        let strng = req(i.replace("\"", ""), m, types);
         vec.push(strng)
         }
 
@@ -45,7 +53,10 @@ async fn main() -> Result<(), Box<dyn Error>>{
 //    }
 
     let mut wb = Workbook::create("result.xlsx");
-    let mut sheet = wb.create_sheet(&model);
+    let mut sheet = wb.create_sheet(
+        if types == 1{"fn"}
+        else {&model}
+    );
     
     wb.write_sheet(&mut sheet, |sheet_writer| {
         let sw = sheet_writer;
@@ -79,16 +90,32 @@ fn open_list() -> Vec<String> {
     list
 }
 
-async fn req(i:String, model:String, types: i8) -> Result<(String, String, String), Box<dyn Error>> {
-    let url = if types == 1 {"https://kkt-online.nalog.ru/lkip.html?query=/fn/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model}
-    else if types == 2 {"https://kkt-online.nalog.ru/lkip.html?query=/kkt/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model}
-    else {"s".to_owned()};
+async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, String), Box<dyn Error>> {
+    let mut vecc: String;
+    let url = if types == 1 {
+        let fn15m = Regex::new(r"^996044\d{10}$").unwrap();
+        let fn36m = Regex::new(r"^996144\d{10}$").unwrap();
+        if fn15m.is_match(&i){model = String::from("0021")}
+        else if fn36m.is_match(&i){model = String::from("0022")}
+        else{}
+        "https://kkt-online.nalog.ru/lkip.html?query=/fn/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model
+    }
+    else if types == 2 {
+        "https://kkt-online.nalog.ru/lkip.html?query=/kkt/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model
+    }
+    else {
+        "0".to_owned()
+    };
     let resp = reqwest::get(url)
         .await?
         .text()
         .await?;
     let v: Value = serde_json::from_str(&resp).unwrap();
-    println!("{}\t{}",i.clone(), v["check_result"]);
-    let mut vecc = v.to_string();
-    Ok((i, v["check_result"].to_string(), vecc))
+    let mut results = v["check_result"].to_string();
+    if v["check_status"] == 1{
+        results = String::from("Готова к работе")
+    }
+    println!("{}\t{}",i.clone(), results);
+    vecc = v.to_string();
+    Ok((i, results, vecc))
 }
