@@ -62,11 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
         sw.append_row(row!["SN", "Parse result", "Source result"]).unwrap();
         for i in results{
             let (one, two, three) = i;
-<<<<<<< HEAD
             sw.append_row(row![one, two, three]).unwrap();
-=======
-            sw.append_row(row![one, two, three])?;
->>>>>>> c0a66201827b171f60eea18ac63b097f726fb049
         }
         sw.append_row(row![blank!(3)])
     }).expect("write excel error!");
