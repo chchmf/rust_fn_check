@@ -11,4 +11,3 @@ reqwest = {version = "0.11", features = ["json"]}
 tokio = {version = "1", features = ["full"]}
 futures = "0.3.21"
 simple_excel_writer = "0.2.0"
-regex = "1.5.6"
