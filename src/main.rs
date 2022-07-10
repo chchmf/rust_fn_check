@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
 //    let mut handles: Vec<tokio::task::JoinHandle<()>> = vec![];
 
-    for i in list {
+    for i in list.into_iter() {
         let m: String = model.clone();
         let types: i8 = types.clone();
         let strng = req(i.replace("\"", ""), m, types);
@@ -90,7 +90,6 @@ fn open_list() -> Vec<String> {
 }
 
 async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, String), Box<dyn Error>> {
-    let vecc: String;
     let url = if types == 1 {
         let fn15m = String::from("996044");
         let fn36m = String::from("996144");
@@ -115,6 +114,5 @@ async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, 
         results = String::from("Готова к работе")
     }
     println!("{}\t{}",i.clone(), results);
-    vecc = v.to_string();
-    Ok((i, results, vecc))
+    Ok((i, results, v.to_string()))
 }
