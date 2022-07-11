@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
         vec.push(strng)
         }
 
-    let results = try_join_all(vec).await?;
+    let results = try_join_all(vec).await.unwrap();
 
 //    for i in list {
 //        let m: String = model.clone();
@@ -89,7 +89,7 @@ fn open_list() -> Vec<String> {
     list
 }
 
-async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, String), Box<dyn Error>> {
+async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, String), (String, String, String)> {
     let url = if types == 1 {
         let fn15m = String::from("996044");
         let fn36m = String::from("996144");
@@ -104,10 +104,14 @@ async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, 
     else {
         "0".to_owned()
     };
-    let resp = reqwest::get(url)
-        .await?
-        .text()
-        .await?;
+    let req = match reqwest::get(url).await{
+        Ok(o) => o,
+        Err(_) => return Ok((i ,String::from("Что-то пошло не так"), String::from("Что-то пошло не так"))),
+    };
+    let resp = match req.text().await{
+        Ok(o) => o,
+        Err(_) => String::from("Не могу распарсить json"),
+    };
     let v: Value = serde_json::from_str(&resp).unwrap();
     let mut results = v["check_result"].to_string();
     if v["check_status"] == 1{
