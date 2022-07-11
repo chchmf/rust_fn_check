@@ -70,7 +70,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
     wb.close().expect("close excel error!");
 
     let duration = start.elapsed();
-    println!("Закончил за: {:?}. Закрой меня...", duration);
+    println!("Закончил за: {:?}. Закрой меня...\nБлагодарности можно писать в телегу @chchmf", duration);
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
     Ok(())
