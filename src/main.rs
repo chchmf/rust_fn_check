@@ -39,7 +39,9 @@ async fn main() -> Result<(), Box<dyn Error>>{
         vec.push(strng)
         }
 
-    let results = try_join_all(vec).await.unwrap();
+    let results = try_join_all(vec)
+        .await
+        .unwrap();
 
 //    for i in list {
 //        let m: String = model.clone();
@@ -92,7 +94,9 @@ fn open_list() -> Vec<String> {
     let file = File::open(&path).unwrap();
     let buffer = BufReader::new(file);
     let list: Vec<String> = buffer
-        .lines().collect::<Result<_, _>>().unwrap();
+        .lines()
+        .collect::<Result<_, _>>()
+        .unwrap();
     list
 }
 
