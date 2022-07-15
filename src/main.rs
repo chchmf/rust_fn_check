@@ -11,7 +11,10 @@ use simple_excel_writer::*;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{
     println!("1 - проверяем ФН\n2 - проверяем ККТ");
-    let types: i8 = input().trim().parse().unwrap();
+    let types: i8 = input()
+        .trim()
+        .parse()
+        .unwrap();
     let model: String;
     if types == 2{
         println!("Введи код модели: ");
@@ -72,20 +75,24 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let duration = start.elapsed();
     println!("Закончил за: {:?}. Закрой меня...", duration);
     let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
+    io::stdin()
+        .read_line(&mut input)
+        .unwrap();
     Ok(())
 }
 
 fn input() -> String {
     let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
+    io::stdin()
+        .read_line(&mut input).unwrap();
     input
 }
 fn open_list() -> Vec<String> {
     let path = "text.txt";
     let file = File::open(&path).unwrap();
     let buffer = BufReader::new(file);
-    let list: Vec<String> = buffer.lines().collect::<Result<_, _>>().unwrap();
+    let list: Vec<String> = buffer
+        .lines().collect::<Result<_, _>>().unwrap();
     list
 }
 
@@ -108,12 +115,15 @@ async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, 
         Ok(o) => o,
         Err(_) => return Ok((i ,String::from("Что-то пошло не так"), String::from("Что-то пошло не так"))),
     };
-    let resp = match req.text().await{
+    let resp = match req
+        .text()
+        .await{
         Ok(o) => o,
         Err(_) => String::from("Не могу распарсить json"),
     };
     let v: Value = serde_json::from_str(&resp).unwrap();
-    let mut results = v["check_result"].to_string();
+    let mut results = v["check_result"]
+        .to_string();
     if v["check_status"] == 1{
         results = String::from("Готова к работе")
     }
