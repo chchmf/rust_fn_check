@@ -30,8 +30,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     let list = open_list();
 
-//    let mut handles: Vec<tokio::task::JoinHandle<()>> = vec![];
-
     for i in list.into_iter() {
         let m: String = model.clone();
         let types: i8 = types.clone();
@@ -42,20 +40,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let results = try_join_all(vec)
         .await
         .unwrap();
-
-//    for i in list {
-//        let m: String = model.clone();
-//        let types: i8 = types.clone().trim().parse().unwrap();
-//        let handle = tokio::spawn(async move{
-//            req(i, m, types).await.unwrap();
-//        });
-//        handles.push(handle);
-//    }
-
-//    for handle in handles{
-//        handle.await.unwrap();
-//    }
-
     let mut wb = Workbook::create("result.xlsx");
     let mut sheet = wb.create_sheet(
         if types == 1{"fn"}
@@ -107,14 +91,14 @@ async fn req(i:String, mut model: String, types: i8) -> Result<(String, String, 
         if &i[..6] == fn15m{model = String::from("0021")}
         else if &i[..6] == fn36m{model = String::from("0022")}
         else{}
-        "https://kkt-online.nalog.ru/lkip.html?query=/fn/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model
-    }
-    else if types == 2 {
-        "https://kkt-online.nalog.ru/lkip.html?query=/kkt/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model
-    }
-    else {
-        "0".to_owned()
-    };
+            "https://kkt-online.nalog.ru/lkip.html?query=/fn/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model
+        }
+        else if types == 2 {
+            "https://kkt-online.nalog.ru/lkip.html?query=/kkt/model/check&factory_number=".to_owned() + &i + "&model_code=" + &model
+        }
+        else {
+            "0".to_owned()
+        };
     let req = match reqwest::get(url).await{
         Ok(o) => o,
         Err(_) => return Ok((i ,String::from("Что-то пошло не так"), String::from("Что-то пошло не так"))),
